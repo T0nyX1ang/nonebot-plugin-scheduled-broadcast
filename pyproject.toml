@@ -1,0 +1,22 @@
+[project]
+name = "nonebot-plugin-scheduled-broadcast"
+version = "0.1.0"
+description = "An event-based scheduled broadcaster aiming for all nonebot2 adapters."
+authors = [
+    {name = "Tony Xiang", email = "tonyxfy@qq.com"},
+]
+dependencies = [
+    "nonebot2>=2.0.0",
+    "nonebot-plugin-apscheduler<1.0.0,>=0.3.0",
+]
+requires-python = ">=3.8"
+readme = "README.md"
+license = {text = "MIT"}
+
+[project.optional-dependencies]
+unimsg = [
+    "nonebot-plugin-alconna>=0.28.0",
+]
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
