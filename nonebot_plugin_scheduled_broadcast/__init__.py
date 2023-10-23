@@ -1,19 +1,13 @@
 """The initialization file."""
 
-import base64
-import hashlib
-import json
-import pickle
-
-import nonebot
 from nonebot import on_command, on_fullmatch
 from nonebot.adapters import Event, Message
-from nonebot.log import logger
 from nonebot.params import CommandArg
 from nonebot.permission import SUPERUSER
 from nonebot.plugin import PluginMetadata
 
 from nonebot_plugin_scheduled_broadcast.config import Config
+from nonebot_plugin_scheduled_broadcast.core import load_broadcast_db, save_broadcast_db, dump_event
 
 __plugin_meta__ = PluginMetadata(
     name="定时广播插件",
@@ -24,43 +18,18 @@ __plugin_meta__ = PluginMetadata(
     config=Config,
 )
 
-global_config = nonebot.get_driver().config
-config = Config.parse_obj(global_config)
-config.broadcast_policy_location.touch(exist_ok=True)  # create the policy file if not exists
-
 anchor_enable = on_fullmatch(msg=('启动广播', 'enablebc'), permission=SUPERUSER)
 anchor_disable = on_command(cmd='关闭广播', aliases={'disablebc'}, permission=SUPERUSER)
-
-
-def load_broadcast_db() -> dict:
-    """Load the broadcast policy database."""
-    with open(config.broadcast_policy_location, 'r', encoding='utf-8') as f:
-        fin = f.read()
-        broadcast_db = json.loads(fin) if fin else {}
-    return broadcast_db
-
-
-def save_broadcast_db(content: dict) -> None:
-    """Save the broadcast policy database."""
-    with open(config.broadcast_policy_location, 'w', encoding='utf-8') as f:
-        fout = json.dumps(content, indent=4, ensure_ascii=False, sort_keys=True)
-        f.write(fout)
 
 
 @anchor_enable.handle()
 async def handle_anchor_enable(event: Event):
     """Handle the anchor_enable command."""
     self_id = str(event.self_id)
-    event_dump = pickle.dumps(event)
-    broadcast_id = hashlib.sha256(event_dump).hexdigest()
-    event_entry = {"config": {}, "edata": base64.b64encode(event_dump).decode()}
+    event_data, broadcast_id = dump_event(event)
+    event_entry = {"config": {}, "edata": event_data}
 
-    try:
-        broadcast_db = load_broadcast_db()
-    except Exception:
-        logger.error("Failed to load broadcast policy database.")
-        await anchor_enable.finish("广播启动失败, 请检查配置文件是否损坏或者格式错误.")
-
+    broadcast_db = load_broadcast_db()
     if self_id not in broadcast_db:
         broadcast_db[self_id] = {}
 
@@ -79,12 +48,7 @@ async def handle_anchor_disable(event: Event, arg: Message = CommandArg()):
     print(self_id)
     broadcast_id = arg.extract_plain_text().strip()
 
-    try:
-        broadcast_db = load_broadcast_db()
-    except Exception:
-        logger.error("Failed to load broadcast policy database.")
-        await anchor_enable.finish("广播关闭失败, 请检查配置文件是否损坏或者格式错误.")
-
+    broadcast_db = load_broadcast_db()
     if self_id not in broadcast_db:
         await anchor_disable.finish("该机器人没有启动任何广播.")
 
