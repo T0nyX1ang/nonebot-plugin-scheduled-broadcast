@@ -1,6 +1,6 @@
-# <center> Nonebot Plugin Scheduled Broadcast </center>
+# <div align="center"> Nonebot Plugin Scheduled Broadcast </div>
 
-<center> ✨ 一款可配置的, 不依赖具体适配器的, 基于事件的定时广播插件. ✨ </center>
+<div align="center"> ✨ 一款可配置的, 不依赖具体适配器的, 基于事件的定时广播插件. ✨ </div>
 
 ## 特性
 
