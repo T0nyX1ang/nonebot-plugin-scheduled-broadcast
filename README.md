@@ -1,2 +1,2 @@
 # nonebot-plugin-scheduled-broadcast
-An event-based scheduled broadcaster aiming for all nonebot2 adapters.
+A customizable, adapter-independent, event-based scheduled broadcaster aiming for all nonebot2 adapters.

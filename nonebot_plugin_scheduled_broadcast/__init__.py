@@ -16,9 +16,9 @@ from nonebot.plugin import PluginMetadata
 from nonebot_plugin_scheduled_broadcast.config import Config
 
 __plugin_meta__ = PluginMetadata(
-    name="nonebot_plugin_scheduled_broadcast",
-    description="An event-based scheduled broadcaster aiming for all nonebot2 adapters.",
-    usage="启动广播/enablebc, 关闭广播/disablebc 广播ID",
+    name="定时广播插件",
+    description="一款可配置的, 不依赖具体适配器的, 基于事件的定时广播插件.",
+    usage="提供超级用户指令: 启动广播/enablebc, 关闭广播/disablebc 广播ID, 提供装饰器: broadcast.",
     type="library",
     homepage="https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast",
     config=Config,
