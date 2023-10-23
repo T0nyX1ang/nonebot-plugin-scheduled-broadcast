@@ -12,7 +12,7 @@ from nonebot_plugin_scheduled_broadcast.core import load_broadcast_db, save_broa
 __plugin_meta__ = PluginMetadata(
     name="定时广播插件",
     description="一款可配置的, 不依赖具体适配器的, 基于事件的定时广播插件.",
-    usage="提供超级用户指令: 启动广播/enablebc, 关闭广播/disablebc 广播ID, 提供装饰器: broadcast.",
+    usage="超级用户指令: 启动广播/enablebc, 关闭广播/disablebc 广播ID\\装饰器: broadcast.",
     type="library",
     homepage="https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast",
     config=Config,
