@@ -45,11 +45,10 @@
 * 在需要启动广播的地方发送:
 
 ```txt
-    启动广播/enablebc
+    启动广播/enablebc 广播ID
 ```
 
-* 如果没有问题的话, 机器人会发送一条包含 `广播ID` 的消息, 该消息为 `pickle.dumps(event)` 的 `sha256` 哈希结果
-* 如果没有问题的话, 机器人在发送 `广播ID` 时, 同时会在 `nonebot2` 项目的根目录下生成一个名为 `broadcast_policy.json` 的配置文件
+* 如果是第一次使用, 机器人在执行上述命令后, 在 `nonebot2` 项目的根目录下生成一个名为 `broadcast_policy.json` 的配置文件
 
 ### 配置文件的填写
 
@@ -62,7 +61,9 @@
             "config": {
                 "example": {"second": "*/30"}
             },
-            "edata": "base64 data"
+            "data": "event data (b64encode)",
+            "hash": "event hash (sha256)",
+            "enable": true
         },
         "another broadcast_id": {
             // ...
@@ -74,7 +75,7 @@
 }
 ```
 
-* 只要改 `config` 键下的配置即可, 改其它地方可能会导致哈希校验不通过. `config` 的可用配置与 `apscheduler` 一致, 以下给出一个示例, 该示例表示, `example` 命令会在每天 `20:48`, 每隔 `10` 秒被触发:
+* `config` 的可用配置与 `apscheduler` 一致, 以下给出一个示例, 该示例表示, `example` 命令会在每天 `20:48`, 每隔 `10` 秒被触发:
 
 ```json
 {
@@ -108,7 +109,7 @@ async def _(self_id: str, event: Event):
     """Scheduled example broadcast."""
     message = generate_your_message()
     try:
-        bot = nonebot.get_bots()[bot_id]  # select the target bot
+        bot = nonebot.get_bots()[self_id]  # select the target bot
         await bot.send(event=event, message=message)  # send message
     except Exception:
         logger.error(traceback.format_exc())  # print logs
@@ -125,7 +126,8 @@ async def _(self_id: str, event: Event):
     停止广播/disablebc 广播ID
 ```
 
-* 停止广播之后, 对应 `广播ID` 的键将被**删除**, 这意味着需要重新配置所有信息
+* 停止广播之后, 对应 `广播ID` 的键中的 `data`, `hash` 将被删除, `enable` 将被置为 `false` 值
+* 停止广播需要重启机器人才能生效
 
 ## 配置
 

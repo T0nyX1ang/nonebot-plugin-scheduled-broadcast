@@ -66,4 +66,4 @@ async def handle_anchor_disable(bot: Bot, arg: Message = CommandArg()):
     broadcast_db[self_id][broadcast_id].pop("hash")
     save_broadcast_db(broadcast_db)
 
-    await anchor_disable.finish("已关闭广播, 请重启机器人.")
+    await anchor_disable.finish("已关闭广播, 重启机器人后生效.")
