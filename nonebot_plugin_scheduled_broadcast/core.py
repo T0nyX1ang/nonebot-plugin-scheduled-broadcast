@@ -59,7 +59,7 @@ def valid(cmd_name: str) -> list[tuple[str, str]]:
     return [(self_id, broadcast_id)
             for self_id in broadcast_db.keys()
             for broadcast_id in broadcast_db[self_id].keys()
-            if broadcast_db[self_id][broadcast_id]["enable"] and cmd_name in broadcast_db[self_id][broadcast_id]["config"]]
+            if cmd_name in broadcast_db[self_id][broadcast_id]["config"]]
 
 
 def broadcast(cmd_name: str):

@@ -39,10 +39,10 @@ async def handle_anchor_enable(bot: Bot, event: Event, arg: Message = CommandArg
     if broadcast_id not in broadcast_db[self_id]:
         broadcast_db[self_id][broadcast_id] = {}
         broadcast_db[self_id][broadcast_id]["config"] = {}
+        broadcast_db[self_id][broadcast_id]["data"] = event_data
+        broadcast_db[self_id][broadcast_id]["hash"] = event_hash
 
-    broadcast_db[self_id][broadcast_id]["enable"] = True
-    broadcast_db[self_id][broadcast_id]["data"] = event_data
-    broadcast_db[self_id][broadcast_id]["hash"] = event_hash
+    broadcast_db[self_id][broadcast_id]["enable"] = True  # enable the broadcast
     save_broadcast_db(broadcast_db)
 
     await anchor_enable.finish(f"已启动广播, 广播ID为{broadcast_id}, 请进行广播配置, 需要删除广播时请使用关闭广播+广播ID")
@@ -62,8 +62,6 @@ async def handle_anchor_disable(bot: Bot, arg: Message = CommandArg()):
         await anchor_disable.finish("该广播ID不存在, 请检查输入是否正确.")
 
     broadcast_db[self_id][broadcast_id]["enable"] = False  # disable the broadcast
-    broadcast_db[self_id][broadcast_id].pop("data")
-    broadcast_db[self_id][broadcast_id].pop("hash")
     save_broadcast_db(broadcast_db)
 
     await anchor_disable.finish("已关闭广播, 重启机器人后生效.")

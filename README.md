@@ -127,7 +127,7 @@ async def _(self_id: str, event: Event):
     停止广播/disablebc 广播ID
 ```
 
-* 停止广播之后, 对应 `广播ID` 中的 `data`, `hash` 将被删除, `enable` 将被置为 `false`
+* 停止广播之后, 对应 `广播ID` 中的 `enable` 将被置为 `false`, 为保持可复用性, 其余部分将不会改变
 * 停止广播需要重启机器人才能生效
 
 ## 配置
