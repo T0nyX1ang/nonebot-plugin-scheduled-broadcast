@@ -9,10 +9,10 @@ import sys
 import nonebot
 from nonebot.adapters import Event
 from nonebot.log import logger
-from nonebot_plugin_apscheduler import scheduler
 
-from nonebot_plugin_scheduled_broadcast.config import Config
+from .config import Config
 
+scheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
 global_config = nonebot.get_driver().config
 config = Config.parse_obj(global_config)
 config.broadcast_policy_location.touch(exist_ok=True)  # create the policy file if not exists
