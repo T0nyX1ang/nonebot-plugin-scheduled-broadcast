@@ -76,7 +76,7 @@ def broadcast(cmd_name: str):
             scheduler.add_job(func=func,
                               args=(self_id, event),
                               trigger='cron',
-                              id=f'{_name}_broadcast_{broadcast_id}_bot_{self_id}',
+                              id=f'broadcast_{broadcast_id}_bot_{self_id}_command_{_name}',
                               misfire_grace_time=30,
                               replace_existing=True,
                               **broadcast_db[self_id][broadcast_id]["config"][_name])
