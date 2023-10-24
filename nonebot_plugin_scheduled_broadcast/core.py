@@ -62,6 +62,20 @@ def valid(cmd_name: str) -> list[tuple[str, str]]:
             if cmd_name in broadcast_db[self_id][broadcast_id]["config"]]
 
 
+def pause_target_jobs(self_id: str, broadcast_id: str) -> None:
+    """Pause the target broadcast jobs."""
+    for cmd_name in broadcast_db[self_id][broadcast_id]["config"].keys():
+        scheduler.pause_job(f'broadcast_{broadcast_id}_bot_{self_id}_command_{cmd_name}')
+        logger.debug(f'Paused broadcast [{broadcast_id}] with bot [{self_id}] for command [{cmd_name}].')
+
+
+def resume_target_jobs(self_id: str, broadcast_id: str) -> None:
+    """Resume the target broadcast jobs."""
+    for cmd_name in broadcast_db[self_id][broadcast_id]["config"].keys():
+        scheduler.resume_job(f'broadcast_{broadcast_id}_bot_{self_id}_command_{cmd_name}')
+        logger.debug(f'Resumed broadcast [{broadcast_id}] with bot [{self_id}] for command [{cmd_name}].')
+
+
 def broadcast(cmd_name: str):
     """Check the policy of each broadcast by name."""
     _name = cmd_name
@@ -81,5 +95,9 @@ def broadcast(cmd_name: str):
                               replace_existing=True,
                               **broadcast_db[self_id][broadcast_id]["config"][_name])
             logger.debug(f'Created broadcast [{broadcast_id}] with bot [{self_id}] for command [{_name}].')
+
+            if not broadcast_db[self_id][broadcast_id]["enable"]:
+                scheduler.pause_job(f'broadcast_{broadcast_id}_bot_{self_id}_command_{_name}')
+                logger.debug(f'Paused broadcast [{broadcast_id}] with bot [{self_id}] for command [{_name}].')
 
     return _broadcast

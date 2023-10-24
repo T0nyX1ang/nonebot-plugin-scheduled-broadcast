@@ -6,8 +6,8 @@ from nonebot.params import CommandArg
 from nonebot.permission import SUPERUSER
 from nonebot.plugin import PluginMetadata
 
-from nonebot_plugin_scheduled_broadcast.config import Config
-from nonebot_plugin_scheduled_broadcast.core import load_broadcast_db, save_broadcast_db, dump_event
+from .config import Config
+from .core import load_broadcast_db, save_broadcast_db, dump_event, pause_target_jobs, resume_target_jobs
 
 __plugin_meta__ = PluginMetadata(
     name="定时广播插件",
@@ -44,6 +44,7 @@ async def handle_anchor_enable(bot: Bot, event: Event, arg: Message = CommandArg
 
     broadcast_db[self_id][broadcast_id]["enable"] = True  # enable the broadcast
     save_broadcast_db(broadcast_db)
+    resume_target_jobs(self_id, broadcast_id)
 
     await anchor_enable.finish(f"已启动广播, 广播ID为{broadcast_id}, 请进行广播配置, 需要删除广播时请使用关闭广播+广播ID")
 
@@ -63,5 +64,6 @@ async def handle_anchor_disable(bot: Bot, arg: Message = CommandArg()):
 
     broadcast_db[self_id][broadcast_id]["enable"] = False  # disable the broadcast
     save_broadcast_db(broadcast_db)
+    pause_target_jobs(self_id, broadcast_id)
 
-    await anchor_disable.finish("已关闭广播, 重启机器人后生效.")
+    await anchor_disable.finish("已关闭广播.")
