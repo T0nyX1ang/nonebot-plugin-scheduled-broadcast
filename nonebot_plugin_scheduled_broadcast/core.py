@@ -26,12 +26,12 @@ except Exception:
     sys.exit(1)
 
 
-def load_broadcast_db() -> dict:
+def load_broadcast_db() -> dict[str, dict[str, dict[str, dict]]]:
     """Load the broadcast policy database."""
     return broadcast_db
 
 
-def save_broadcast_db(content: dict) -> None:
+def save_broadcast_db(content: dict[str, dict[str, dict[str, dict]]]) -> None:
     """Save the broadcast policy database."""
     with open(config.broadcast_policy_location, 'w', encoding='utf-8') as fo:
         fout = json.dumps(content, indent=4, ensure_ascii=False, sort_keys=True)
@@ -54,17 +54,17 @@ def dump_event(event: Event) -> tuple[str, str]:
     return (event_b64, event_hash)
 
 
-def valid(command_name: str) -> list[tuple[str, str]]:
+def valid(cmd_name: str) -> list[tuple[str, str]]:
     """Get all valid [self_id, broadcast_id] tuple for broadcast policy."""
     return [(self_id, broadcast_id)
             for self_id in broadcast_db.keys()
             for broadcast_id in broadcast_db[self_id].keys()
-            if command_name in broadcast_db[self_id][broadcast_id]["config"]]
+            if broadcast_db[self_id][broadcast_id]["enable"] and cmd_name in broadcast_db[self_id][broadcast_id]["config"]]
 
 
-def broadcast(command_name: str):
+def broadcast(cmd_name: str):
     """Check the policy of each broadcast by name."""
-    _name = command_name
+    _name = cmd_name
 
     def _broadcast(func):
         """Rule wrapper for "broadcast" item in the policy control."""
