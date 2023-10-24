@@ -70,7 +70,9 @@ def broadcast(command_name: str):
         """Rule wrapper for "broadcast" item in the policy control."""
         logger.debug(f'Checking broadcast: [{_name}].')
         for self_id, broadcast_id in valid(_name):
-            event = load_event(broadcast_db[self_id][broadcast_id]['edata'], broadcast_id)
+            event_data = broadcast_db[self_id][broadcast_id]['data']
+            event_hash = broadcast_db[self_id][broadcast_id]['hash']
+            event = load_event(event_data, event_hash)
             scheduler.add_job(func=func,
                               args=(self_id, event),
                               trigger='cron',

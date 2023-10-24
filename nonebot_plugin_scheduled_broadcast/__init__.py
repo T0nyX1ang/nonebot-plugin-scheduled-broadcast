@@ -1,6 +1,6 @@
 """The initialization file."""
 
-from nonebot import on_command, on_fullmatch
+from nonebot import on_command
 from nonebot.adapters import Bot, Event, Message
 from nonebot.params import CommandArg
 from nonebot.permission import SUPERUSER
@@ -12,37 +12,39 @@ from nonebot_plugin_scheduled_broadcast.core import load_broadcast_db, save_broa
 __plugin_meta__ = PluginMetadata(
     name="定时广播插件",
     description="一款可配置的, 不依赖具体适配器的, 基于事件的定时广播插件.",
-    usage="超级用户指令: 启动广播/enablebc, 关闭广播/disablebc 广播ID\\装饰器: broadcast.",
+    usage="超级用户指令: 启动广播/enablebc 广播ID, 关闭广播/disablebc 广播ID\\装饰器: broadcast.",
     type="library",
     homepage="https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast",
     config=Config,
 )
 
-anchor_enable = on_fullmatch(msg=('启动广播', 'enablebc'), permission=SUPERUSER)
+anchor_enable = on_command(cmd='启动广播', aliases={'enablebc'}, permission=SUPERUSER)
 anchor_disable = on_command(cmd='关闭广播', aliases={'disablebc'}, permission=SUPERUSER)
 
 
 @anchor_enable.handle()
-async def handle_anchor_enable(bot: Bot, event: Event):
+async def handle_anchor_enable(bot: Bot, event: Event, arg: Message = CommandArg()):
     """Handle the anchor_enable command."""
     self_id = str(bot.self_id)
-    event_data, broadcast_id = dump_event(event)
-    event_entry = {"config": {}, "edata": event_data}
+    broadcast_id = arg.extract_plain_text().strip()
+    if not broadcast_id:
+        await anchor_enable.finish("广播ID不能为空.")
+
+    event_data, event_hash = dump_event(event)
+    event_entry = {"config": {}, "data": event_data, "hash": event_hash}
 
     broadcast_db = load_broadcast_db()
     if self_id not in broadcast_db:
         broadcast_db[self_id] = {}
 
-    if broadcast_id not in broadcast_db[self_id]:
-        broadcast_db[self_id][broadcast_id] = event_entry
-
+    broadcast_db[self_id][broadcast_id] = event_entry  # update the db
     save_broadcast_db(broadcast_db)
 
     await anchor_enable.finish(f"已启动广播, 广播ID为{broadcast_id}, 请进行广播配置, 需要删除广播时请使用关闭广播+广播ID")
 
 
 @anchor_disable.handle()
-async def handle_anchor_disable(bot: Bot, event: Event, arg: Message = CommandArg()):
+async def handle_anchor_disable(bot: Bot, arg: Message = CommandArg()):
     """Handle the anchor_disable command."""
     self_id = str(bot.self_id)
     broadcast_id = arg.extract_plain_text().strip()
