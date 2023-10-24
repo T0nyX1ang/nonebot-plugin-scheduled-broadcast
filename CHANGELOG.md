@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/compare/v0.1.0...v0.1.1) (2023-10-24)
+
+
+### Bug Fixes
+
+* **plugin-check:** use `require` grammar ([3c05856](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/commit/3c058566f7b0498b421c60909cb13766cf50ac64))
+
 ## 0.1.0 (2023-10-24)
 
 ### ⚠ BREAKING CHANGES
