@@ -1,7 +1,7 @@
 """The initialization file."""
 
 from nonebot import on_command, on_fullmatch
-from nonebot.adapters import Event, Message
+from nonebot.adapters import Bot, Event, Message
 from nonebot.params import CommandArg
 from nonebot.permission import SUPERUSER
 from nonebot.plugin import PluginMetadata
@@ -23,9 +23,9 @@ anchor_disable = on_command(cmd='关闭广播', aliases={'disablebc'}, permissio
 
 
 @anchor_enable.handle()
-async def handle_anchor_enable(event: Event):
+async def handle_anchor_enable(bot: Bot, event: Event):
     """Handle the anchor_enable command."""
-    self_id = str(event.self_id)
+    self_id = str(bot.self_id)
     event_data, broadcast_id = dump_event(event)
     event_entry = {"config": {}, "edata": event_data}
 
@@ -42,10 +42,9 @@ async def handle_anchor_enable(event: Event):
 
 
 @anchor_disable.handle()
-async def handle_anchor_disable(event: Event, arg: Message = CommandArg()):
+async def handle_anchor_disable(bot: Bot, event: Event, arg: Message = CommandArg()):
     """Handle the anchor_disable command."""
-    self_id = str(event.self_id)
-    print(self_id)
+    self_id = str(bot.self_id)
     broadcast_id = arg.extract_plain_text().strip()
 
     broadcast_db = load_broadcast_db()
