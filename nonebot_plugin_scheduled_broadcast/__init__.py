@@ -12,7 +12,7 @@ from .core import load_broadcast_db, save_broadcast_db, dump_event, pause_target
 __plugin_meta__ = PluginMetadata(
     name="定时广播插件",
     description="一款可配置的, 不依赖具体适配器的, 基于事件的定时广播插件.",
-    usage="超级用户指令: 启动广播/enablebc 广播ID, 关闭广播/disablebc 广播ID\\装饰器: broadcast.",
+    usage="超级用户指令:\n启动广播/enablebc 广播ID,\n关闭广播/disablebc 广播ID\n装饰器: broadcast",
     type="library",
     homepage="https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast",
     config=Config,
@@ -28,7 +28,7 @@ async def handle_anchor_enable(bot: Bot, event: Event, arg: Message = CommandArg
     self_id = str(bot.self_id)
     broadcast_id = arg.extract_plain_text().strip()
     if not broadcast_id:
-        await anchor_enable.finish("广播ID不能为空.")
+        await anchor_enable.finish("广播ID不能为空")
 
     event_data, event_hash = dump_event(event)
 
@@ -57,13 +57,13 @@ async def handle_anchor_disable(bot: Bot, arg: Message = CommandArg()):
 
     broadcast_db = load_broadcast_db()
     if self_id not in broadcast_db:
-        await anchor_disable.finish("该机器人没有启动任何广播.")
+        await anchor_disable.finish("该机器人没有启动任何广播")
 
     if broadcast_id not in broadcast_db[self_id]:
-        await anchor_disable.finish("该广播ID不存在, 请检查输入是否正确.")
+        await anchor_disable.finish("该广播ID不存在, 请检查输入是否正确")
 
     broadcast_db[self_id][broadcast_id]["enable"] = False  # disable the broadcast
     save_broadcast_db(broadcast_db)
     pause_target_jobs(self_id, broadcast_id)
 
-    await anchor_disable.finish("已关闭广播.")
+    await anchor_disable.finish("已关闭广播")
