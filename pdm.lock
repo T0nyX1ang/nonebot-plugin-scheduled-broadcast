@@ -2,7 +2,7 @@
 # It is not intended for manual editing.
 
 [metadata]
-groups = ["default", "nonebot-plugin-alconna>=0.28.0", "unimsg", "test"]
+groups = ["default", "test"]
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
