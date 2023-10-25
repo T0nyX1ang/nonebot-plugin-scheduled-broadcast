@@ -5,12 +5,15 @@ import hashlib
 import pickle
 import json
 import sys
+from typing import Dict, Tuple, List, Any
 
 import nonebot
 from nonebot.adapters import Event
 from nonebot.log import logger
 
 from .config import Config
+
+T_Boardcast_DB = Dict[str, Dict[str, Dict[str, Any]]]
 
 scheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
 global_config = nonebot.get_driver().config
@@ -20,18 +23,18 @@ config.broadcast_policy_location.touch(exist_ok=True)  # create the policy file 
 try:
     with open(config.broadcast_policy_location, 'r', encoding='utf-8') as fi:
         fin = fi.read()
-        broadcast_db: dict[str, dict[str, dict[str, dict]]] = json.loads(fin) if fin else {}
+        broadcast_db: T_Boardcast_DB = json.loads(fin) if fin else {}
 except Exception:
     logger.error("Failed to load broadcast policy database, please check it.")
     sys.exit(1)
 
 
-def load_broadcast_db() -> dict[str, dict[str, dict[str, dict]]]:
+def load_broadcast_db() -> T_Boardcast_DB:
     """Load the broadcast policy database."""
     return broadcast_db
 
 
-def save_broadcast_db(content: dict[str, dict[str, dict[str, dict]]]) -> None:
+def save_broadcast_db(content: T_Boardcast_DB) -> None:
     """Save the broadcast policy database."""
     with open(config.broadcast_policy_location, 'w', encoding='utf-8') as fo:
         fout = json.dumps(content, indent=4, ensure_ascii=False, sort_keys=True)
@@ -46,7 +49,7 @@ def load_event(event_str: str, event_hash: str) -> Event:
     return pickle.loads(event_dump)
 
 
-def dump_event(event: Event) -> tuple[str, str]:
+def dump_event(event: Event) -> Tuple[str, str]:
     """Dump an event into a base64 string with a hash."""
     event_dump = pickle.dumps(event)
     event_hash = hashlib.sha256(event_dump).hexdigest()
@@ -54,7 +57,7 @@ def dump_event(event: Event) -> tuple[str, str]:
     return (event_b64, event_hash)
 
 
-def valid(cmd_name: str) -> list[tuple[str, str]]:
+def valid(cmd_name: str) -> List[Tuple[str, str]]:
     """Get all valid [self_id, broadcast_id] tuple for broadcast policy."""
     return [(self_id, broadcast_id)
             for self_id in broadcast_db.keys()
@@ -84,8 +87,8 @@ def broadcast(cmd_name: str):
         """Rule wrapper for "broadcast" item in the policy control."""
         logger.debug(f'Checking broadcast: [{_name}].')
         for self_id, broadcast_id in valid(_name):
-            event_data = broadcast_db[self_id][broadcast_id]['data']
-            event_hash = broadcast_db[self_id][broadcast_id]['hash']
+            event_data: str = broadcast_db[self_id][broadcast_id]["data"]
+            event_hash: str = broadcast_db[self_id][broadcast_id]["hash"]
             event = load_event(event_data, event_hash)
             scheduler.add_job(func=func,
                               args=(self_id, event),
