@@ -21,7 +21,7 @@ config = Config.parse_obj(global_config)
 config.broadcast_policy_location.touch(exist_ok=True)  # create the policy file if not exists
 
 try:
-    with open(config.broadcast_policy_location, 'r', encoding='utf-8') as fi:
+    with open(config.broadcast_policy_location, "r", encoding="utf-8") as fi:
         fin = fi.read()
         broadcast_db: T_Boardcast_DB = json.loads(fin) if fin else {}
 except Exception:
@@ -36,7 +36,7 @@ def load_broadcast_db() -> T_Boardcast_DB:
 
 def save_broadcast_db(content: T_Boardcast_DB) -> None:
     """Save the broadcast policy database."""
-    with open(config.broadcast_policy_location, 'w', encoding='utf-8') as fo:
+    with open(config.broadcast_policy_location, "w", encoding="utf-8") as fo:
         fout = json.dumps(content, indent=4, ensure_ascii=False, sort_keys=True)
         fo.write(fout)
 
@@ -45,7 +45,7 @@ def load_event(event_str: str, event_hash: str) -> Event:
     """Load an event from a base64 string and validate its hash."""
     event_dump = base64.b64decode(event_str.encode())
     if hashlib.sha256(event_dump).hexdigest() != event_hash:
-        raise ValueError('Event hash mismatch, the data may be corrupted or tampered.')
+        raise ValueError("Event hash mismatch, the data may be corrupted or tampered.")
     return pickle.loads(event_dump)
 
 
@@ -59,24 +59,26 @@ def dump_event(event: Event) -> Tuple[str, str]:
 
 def valid(cmd_name: str) -> List[Tuple[str, str]]:
     """Get all valid [self_id, broadcast_id] tuple for broadcast policy."""
-    return [(self_id, broadcast_id)
-            for self_id in broadcast_db.keys()
-            for broadcast_id in broadcast_db[self_id].keys()
-            if cmd_name in broadcast_db[self_id][broadcast_id]["config"]]
+    return [
+        (self_id, broadcast_id)
+        for self_id in broadcast_db.keys()
+        for broadcast_id in broadcast_db[self_id].keys()
+        if cmd_name in broadcast_db[self_id][broadcast_id]["config"]
+    ]
 
 
 def pause_target_jobs(self_id: str, broadcast_id: str) -> None:
     """Pause the target broadcast jobs."""
     for cmd_name in broadcast_db[self_id][broadcast_id]["config"].keys():
-        scheduler.pause_job(f'broadcast_{broadcast_id}_bot_{self_id}_command_{cmd_name}')
-        logger.debug(f'Paused broadcast [{broadcast_id}] with bot [{self_id}] for command [{cmd_name}].')
+        scheduler.pause_job(f"broadcast_{broadcast_id}_bot_{self_id}_command_{cmd_name}")
+        logger.debug(f"Paused broadcast [{broadcast_id}] with bot [{self_id}] for command [{cmd_name}].")
 
 
 def resume_target_jobs(self_id: str, broadcast_id: str) -> None:
     """Resume the target broadcast jobs."""
     for cmd_name in broadcast_db[self_id][broadcast_id]["config"].keys():
-        scheduler.resume_job(f'broadcast_{broadcast_id}_bot_{self_id}_command_{cmd_name}')
-        logger.debug(f'Resumed broadcast [{broadcast_id}] with bot [{self_id}] for command [{cmd_name}].')
+        scheduler.resume_job(f"broadcast_{broadcast_id}_bot_{self_id}_command_{cmd_name}")
+        logger.debug(f"Resumed broadcast [{broadcast_id}] with bot [{self_id}] for command [{cmd_name}].")
 
 
 def broadcast(cmd_name: str):
@@ -85,22 +87,24 @@ def broadcast(cmd_name: str):
 
     def _broadcast(func):
         """Rule wrapper for "broadcast" item in the policy control."""
-        logger.debug(f'Checking broadcast: [{_name}].')
+        logger.debug(f"Checking broadcast: [{_name}].")
         for self_id, broadcast_id in valid(_name):
             event_data: str = broadcast_db[self_id][broadcast_id]["data"]
             event_hash: str = broadcast_db[self_id][broadcast_id]["hash"]
             event = load_event(event_data, event_hash)
-            scheduler.add_job(func=func,
-                              args=(self_id, event),
-                              trigger='cron',
-                              id=f'broadcast_{broadcast_id}_bot_{self_id}_command_{_name}',
-                              misfire_grace_time=30,
-                              replace_existing=True,
-                              **broadcast_db[self_id][broadcast_id]["config"][_name])
-            logger.debug(f'Created broadcast [{broadcast_id}] with bot [{self_id}] for command [{_name}].')
+            scheduler.add_job(
+                func=func,
+                args=(self_id, event),
+                trigger="cron",
+                id=f"broadcast_{broadcast_id}_bot_{self_id}_command_{_name}",
+                misfire_grace_time=30,
+                replace_existing=True,
+                **broadcast_db[self_id][broadcast_id]["config"][_name],
+            )
+            logger.debug(f"Created broadcast [{broadcast_id}] with bot [{self_id}] for command [{_name}].")
 
             if not broadcast_db[self_id][broadcast_id]["enable"]:
-                scheduler.pause_job(f'broadcast_{broadcast_id}_bot_{self_id}_command_{_name}')
-                logger.debug(f'Paused broadcast [{broadcast_id}] with bot [{self_id}] for command [{_name}].')
+                scheduler.pause_job(f"broadcast_{broadcast_id}_bot_{self_id}_command_{_name}")
+                logger.debug(f"Paused broadcast [{broadcast_id}] with bot [{self_id}] for command [{_name}].")
 
     return _broadcast

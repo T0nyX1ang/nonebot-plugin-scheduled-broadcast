@@ -18,8 +18,8 @@ __plugin_meta__ = PluginMetadata(
     config=Config,
 )
 
-anchor_enable = on_command(cmd='启动广播', aliases={'enablebc'}, permission=SUPERUSER)
-anchor_disable = on_command(cmd='关闭广播', aliases={'disablebc'}, permission=SUPERUSER)
+anchor_enable = on_command(cmd="启动广播", aliases={"enablebc"}, permission=SUPERUSER)
+anchor_disable = on_command(cmd="关闭广播", aliases={"disablebc"}, permission=SUPERUSER)
 
 
 @anchor_enable.handle()
