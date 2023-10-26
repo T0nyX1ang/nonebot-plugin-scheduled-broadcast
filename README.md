@@ -1,5 +1,17 @@
 # <div align="center"> Nonebot Plugin Scheduled Broadcast </div>
 
+<p align="center">
+  <a href="https://pypi.python.org/pypi/nonebot-plugin-scheduled-broadcast">
+    <img src="https://img.shields.io/pypi/v/nonebot-plugin-scheduled-broadcast.svg?color=blue" alt="pypi">
+  </a>
+  <a href="https://codecov.io/gh/T0nyX1ang/nonebot-plugin-scheduled-broadcast" > 
+    <img src="https://codecov.io/gh/T0nyX1ang/nonebot-plugin-scheduled-broadcast/graph/badge.svg?token=AUFO081ZBW"/> 
+  </a>
+  <a href="./LICENSE">
+    <img src="https://img.shields.io/github/license/T0nyX1ang/nonebot-plugin-scheduled-broadcast.svg?color=blue" alt="license">
+  </a>
+</p>
+
 <div align="center"> ✨ 一款可配置的, 不依赖具体适配器的, 基于事件的定时广播插件. ✨ </div>
 
 ## 特性
