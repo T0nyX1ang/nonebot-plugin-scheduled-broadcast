@@ -19,8 +19,11 @@ def make_event(message: str, user_id="TestUser") -> TestMsgEvent:
 @pytest.mark.asyncio
 async def test_broadcast_command(app: App):
     """Test the broadcast command."""
-    from nonebot_plugin_scheduled_broadcast import anchor_enable, load_broadcast_db  # pylint: disable=import-outside-toplevel
-    from nonebot_plugin_scheduled_broadcast import dump_event  # pylint: disable=import-outside-toplevel
+    from nonebot_plugin_scheduled_broadcast import (  # pylint: disable=import-outside-toplevel
+        anchor_enable,
+        dump_event,
+        load_broadcast_db,
+    )
 
     normal_user_enable_bid = make_event("enablebc testid")
     enable_without_bid = make_event("enablebc", user_id="TestSuperUser")
@@ -53,7 +56,10 @@ async def test_broadcast_command(app: App):
 @pytest.mark.asyncio
 async def test_disable_broadcast_command(app: App):
     """Test the broadcast command."""
-    from nonebot_plugin_scheduled_broadcast import anchor_disable, load_broadcast_db  # pylint: disable=import-outside-toplevel
+    from nonebot_plugin_scheduled_broadcast import (  # pylint: disable=import-outside-toplevel
+        anchor_disable,
+        load_broadcast_db,
+    )
 
     normal_user_disable_bid = make_event("disablebc testid")
     disable_without_bid = make_event("disablebc", user_id="TestSuperUser")
