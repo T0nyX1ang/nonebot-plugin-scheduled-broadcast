@@ -33,7 +33,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        pdm run pytest -W ignore --asyncio-mode=auto --cov=nonebot_plugin_scheduled_broadcast
+        pdm run pytest -W ignore --asyncio-mode=auto --cov=nonebot_plugin_scheduled_broadcast --cov-report=xml
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
