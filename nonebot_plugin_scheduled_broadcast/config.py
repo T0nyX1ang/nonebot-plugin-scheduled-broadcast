@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from pydantic import Extra, BaseSettings
+from pydantic import BaseSettings, Extra
 
 
 class Config(BaseSettings, extra=Extra.ignore):

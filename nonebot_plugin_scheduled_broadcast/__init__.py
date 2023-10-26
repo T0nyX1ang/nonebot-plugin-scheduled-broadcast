@@ -7,7 +7,13 @@ from nonebot.permission import SUPERUSER
 from nonebot.plugin import PluginMetadata
 
 from .config import Config
-from .core import load_broadcast_db, save_broadcast_db, dump_event, pause_target_jobs, resume_target_jobs
+from .core import (
+    dump_event,
+    load_broadcast_db,
+    pause_target_jobs,
+    resume_target_jobs,
+    save_broadcast_db,
+)
 
 __plugin_meta__ = PluginMetadata(
     name="定时广播插件",
