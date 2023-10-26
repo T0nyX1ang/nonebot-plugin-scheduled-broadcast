@@ -4,7 +4,6 @@ import base64
 import hashlib
 import json
 import pickle
-import sys
 from typing import Any, Dict, List, Tuple
 
 import nonebot
@@ -24,9 +23,9 @@ try:
     with open(config.broadcast_policy_location, "r", encoding="utf-8") as fi:
         fin = fi.read()
         broadcast_db: T_Boardcast_DB = json.loads(fin) if fin else {}
-except Exception:
+except Exception as e:
     logger.error("Failed to load broadcast policy database, please check it.")
-    sys.exit(1)
+    raise e
 
 
 def load_broadcast_db() -> T_Boardcast_DB:
