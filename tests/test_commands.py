@@ -62,10 +62,18 @@ async def test_broadcast_command(app: App):
     db = load_broadcast_db()
     assert db["TestBot"]["testid"]["enable"] is True
     assert db["TestBot"]["testid"]["config"] == {}
+    assert db["TestBot"]["TestLocation"]["enable"] is True
+    assert db["TestBot"]["TestLocation"]["config"] == {}
 
-    edata, ehash = dump_event(enable_with_bid)
-    assert db["TestBot"]["testid"]["data"] == edata
-    assert db["TestBot"]["testid"]["hash"] == ehash
+    recovered_event = load_event(db["TestBot"]["testid"]["data"], db["TestBot"]["testid"]["hash"])
+    assert recovered_event.get_message() == TestMsg("enablebc testid")
+    assert recovered_event.get_user_id() == "TestSuperUser"
+    assert recovered_event.get_session_id() == "TestSuperUser"
+
+    recovered_event = load_event(db["TestBot"]["TestLocation"]["data"], db["TestBot"]["TestLocation"]["hash"])
+    assert recovered_event.get_message() == TestMsg("enablebc")
+    assert recovered_event.get_user_id() == "TestSuperUser"
+    assert recovered_event.get_session_id() == "TestLocationTestSuperUser"
 
 
 @pytest.mark.asyncio
@@ -150,9 +158,7 @@ async def test_broadcast_function(app: App):
     assert job.next_run_time is None
     target_event = job.args[1]
     assert target_event is not None
-    edata, ehash = dump_event(target_event)
-    assert db["TestBot"]["testid"]["data"] == edata
-    assert db["TestBot"]["testid"]["hash"] == ehash
+    assert target_event == enable_with_bid  # check if the event is correctly passed to the job
 
     async with app.test_matcher(anchor_enable) as ctx:
         bot = ctx.create_bot(self_id="TestBot")
