@@ -2,8 +2,8 @@
 
 import pathlib
 
-import pytest
 import nonebot
+import pytest
 from nonebug import App
 
 from . import TestMsg, TestMsgEvent
@@ -26,9 +26,9 @@ def load_bot() -> None:
         assert True
 
 
-def make_event(message: str, user_id="TestUser") -> TestMsgEvent:
+def make_event(message: str, user_id: str = "TestUser", location: str = "") -> TestMsgEvent:
     """Make a MessageEvent."""
-    return TestMsgEvent(message=TestMsg(message), user_id=user_id)
+    return TestMsgEvent(message=TestMsg(message), user_id=user_id, location=location)
 
 
 @pytest.mark.asyncio
@@ -36,13 +36,17 @@ async def test_broadcast_command(app: App):
     """Test the broadcast command."""
     from nonebot_plugin_scheduled_broadcast import (  # pylint: disable=import-outside-toplevel
         anchor_enable,
-        dump_event,
         load_broadcast_db,
+    )
+
+    from nonebot_plugin_scheduled_broadcast.core import (  # pylint: disable=import-outside-toplevel
+        load_event,
     )
 
     normal_user_enable_bid = make_event("enablebc testid")
     enable_without_bid = make_event("enablebc", user_id="TestSuperUser")
     enable_with_bid = make_event("enablebc testid", user_id="TestSuperUser")
+    enable_with_location = make_event("enablebc", user_id="TestSuperUser", location="TestLocation")
 
     async with app.test_matcher(anchor_enable) as ctx:
         bot = ctx.create_bot(self_id="TestBot")
@@ -56,6 +60,10 @@ async def test_broadcast_command(app: App):
         ctx.receive_event(bot, enable_with_bid)
         ctx.should_pass_permission()
         ctx.should_call_send(enable_with_bid, "已启动广播, 广播ID为testid, 请进行广播配置, 需要删除广播时请使用关闭广播+广播ID")
+
+        ctx.receive_event(bot, enable_with_location)
+        ctx.should_pass_permission()
+        ctx.should_call_send(enable_with_location, "已启动广播, 广播ID为TestLocation, 请进行广播配置, 需要删除广播时请使用关闭广播+广播ID")
 
         assert pathlib.Path("broadcast_policy.json").exists()
 
@@ -88,6 +96,7 @@ async def test_disable_broadcast_command(app: App):
     disable_without_bid = make_event("disablebc", user_id="TestSuperUser")
     disable_with_fake_bid = make_event("disablebc fakeid", user_id="TestSuperUser")
     disable_with_bid = make_event("disablebc testid", user_id="TestSuperUser")
+    disable_with_location = make_event("disablebc", user_id="TestSuperUser", location="TestLocation")
 
     async with app.test_matcher(anchor_disable) as ctx:
         bot = ctx.create_bot(self_id="TestBot")
@@ -106,9 +115,15 @@ async def test_disable_broadcast_command(app: App):
         ctx.should_pass_permission()
         ctx.should_call_send(disable_with_bid, "已关闭广播")
 
+        ctx.receive_event(bot, disable_with_location)
+        ctx.should_pass_permission()
+        ctx.should_call_send(disable_with_location, "已关闭广播")
+
     db = load_broadcast_db()
     assert db["TestBot"]["testid"]["enable"] is False
     assert db["TestBot"]["testid"]["config"] == {}
+    assert db["TestBot"]["TestLocation"]["enable"] is False
+    assert db["TestBot"]["TestLocation"]["config"] == {}
 
     async with app.test_matcher(anchor_disable) as ctx:
         bot = ctx.create_bot(self_id="FakeBot")
@@ -130,7 +145,6 @@ async def test_broadcast_function(app: App):
     )
     from nonebot_plugin_scheduled_broadcast.core import (  # pylint: disable=import-outside-toplevel
         broadcast,
-        dump_event,
         load_broadcast_db,
     )
 
