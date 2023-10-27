@@ -153,7 +153,7 @@ async def test_broadcast_function(app: App):
 
     db = load_broadcast_db()
     db["TestBot"]["testid"]["enable"] = False
-    db["TestBot"]["testid"]["config"] = {"testcommand": {"minute": "0"}}
+    db["TestBot"]["testid"]["config"] = {"testcommand": {"minute": "0"}, "unknowncommand": {}}  # special case
 
     @broadcast("testcommand")
     async def _(self_id: str, event: TestMsgEvent):
