@@ -13,7 +13,7 @@
         "editor.defaultFormatter": "ms-python.black-formatter"
     },
     "markdownlint.config": {
-        "no-inline-html": { "allowed_elements": ["div", "p", "a"] },
+        "no-inline-html": { "allowed_elements": ["div", "p", "a", "img"] },
         "MD024": false
     }
 }
