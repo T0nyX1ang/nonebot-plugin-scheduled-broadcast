@@ -8,7 +8,7 @@ from pydantic import BaseModel, Extra  # pylint: disable=no-name-in-module
 class BroadcastConfig(BaseModel, extra=Extra.allow):
     """The model for a specific broadcast config."""
 
-    config: Dict[str, Dict[str, Union[int, str]]]
+    config: Dict[str, Dict[str, Union[int, str]]]  # apscheduler compatible config
     enable: bool
     data: str
     hash: str

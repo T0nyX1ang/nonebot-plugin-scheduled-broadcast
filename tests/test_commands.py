@@ -68,17 +68,17 @@ async def test_broadcast_command(app: App):
         assert pathlib.Path("broadcast_policy.json").exists()
 
     db = load_broadcast_db()
-    assert db["TestBot"]["testid"]["enable"] is True
-    assert db["TestBot"]["testid"]["config"] == {}
-    assert db["TestBot"]["TestLocation"]["enable"] is True
-    assert db["TestBot"]["TestLocation"]["config"] == {}
+    assert db["TestBot"]["testid"].enable is True
+    assert db["TestBot"]["testid"].config == {}
+    assert db["TestBot"]["TestLocation"].enable is True
+    assert db["TestBot"]["TestLocation"].config == {}
 
-    recovered_event = load_event(db["TestBot"]["testid"]["data"], db["TestBot"]["testid"]["hash"])
+    recovered_event = load_event(db["TestBot"]["testid"].data, db["TestBot"]["testid"].hash)
     assert recovered_event.get_message() == TestMsg("enablebc testid")
     assert recovered_event.get_user_id() == "TestSuperUser"
     assert recovered_event.get_session_id() == "TestSuperUser"
 
-    recovered_event = load_event(db["TestBot"]["TestLocation"]["data"], db["TestBot"]["TestLocation"]["hash"])
+    recovered_event = load_event(db["TestBot"]["TestLocation"].data, db["TestBot"]["TestLocation"].hash)
     assert recovered_event.get_message() == TestMsg("enablebc")
     assert recovered_event.get_user_id() == "TestSuperUser"
     assert recovered_event.get_session_id() == "TestLocationTestSuperUser"
@@ -120,10 +120,10 @@ async def test_disable_broadcast_command(app: App):
         ctx.should_call_send(disable_with_location, "已关闭广播")
 
     db = load_broadcast_db()
-    assert db["TestBot"]["testid"]["enable"] is False
-    assert db["TestBot"]["testid"]["config"] == {}
-    assert db["TestBot"]["TestLocation"]["enable"] is False
-    assert db["TestBot"]["TestLocation"]["config"] == {}
+    assert db["TestBot"]["testid"].enable is False
+    assert db["TestBot"]["testid"].config == {}
+    assert db["TestBot"]["TestLocation"].enable is False
+    assert db["TestBot"]["TestLocation"].config == {}
 
     async with app.test_matcher(anchor_disable) as ctx:
         bot = ctx.create_bot(self_id="FakeBot")
@@ -152,8 +152,8 @@ async def test_broadcast_function(app: App):
     disable_with_bid = make_event("disablebc testid", user_id="TestSuperUser")
 
     db = load_broadcast_db()
-    db["TestBot"]["testid"]["enable"] = False
-    db["TestBot"]["testid"]["config"] = {"testcommand": {"minute": "0"}, "unknowncommand": {}}  # special case
+    db["TestBot"]["testid"].enable = False
+    db["TestBot"]["testid"].config = {"testcommand": {"minute": "0"}, "unknowncommand": {}}  # special case
 
     @broadcast("testcommand")
     async def _(self_id: str, event: TestMsgEvent):
@@ -180,7 +180,7 @@ async def test_broadcast_function(app: App):
         ctx.should_pass_permission()
         ctx.should_call_send(enable_with_bid, "已启动广播, 广播ID为testid, 请进行广播配置, 需要删除广播时请使用关闭广播+广播ID")
 
-    assert db["TestBot"]["testid"]["enable"] is True
+    assert db["TestBot"]["testid"].enable is True
     assert "broadcast_testid_bot_TestBot_command_testcommand" in job_ids
     assert "broadcast_testid_bot_TestBot_command_fakecommand" not in job_ids
 
@@ -194,10 +194,10 @@ async def test_broadcast_function(app: App):
         ctx.should_pass_permission()
         ctx.should_call_send(disable_with_bid, "已关闭广播")
 
-    assert db["TestBot"]["testid"]["enable"] is False
+    assert db["TestBot"]["testid"].enable is False
 
     # false hash
-    db["TestBot"]["testid"]["hash"] = db["TestBot"]["testid"]["hash"][::-1]
+    db["TestBot"]["testid"].hash = db["TestBot"]["testid"].hash[::-1]
 
     try:
 
