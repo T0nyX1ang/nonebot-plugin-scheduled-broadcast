@@ -163,6 +163,8 @@ async def test_broadcast_function(app: App):
     async def _(self_id: str, event: TestMsgEvent):
         ...  # code will not reach here
 
+    assert "unknowncommand" not in db["TestBot"]["testid"].valid_commands
+
     job_ids = [job.id for job in scheduler.get_jobs()]
     assert "broadcast_testid_bot_TestBot_command_testcommand" in job_ids
     assert "broadcast_testid_bot_TestBot_command_fakecommand" not in job_ids
