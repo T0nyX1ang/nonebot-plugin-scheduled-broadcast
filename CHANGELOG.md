@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.2](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/compare/v0.1.1...v0.1.2) (2023-10-27)
+
+### Features
+
+* slightly change some replies ([f3c0337](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/commit/f3c03378d4638bfb9b0ae45f83e7e03455666a58))
+* support [#5](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/issues/5) by extracting the broadcast id ([219d54d](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/commit/219d54d5df6a4c8cd33e51136ce01442cac0ab6e))
+
+### Bug Fixes
+
+* **ci:** coverage test doesn't upload to codecov ([09838e8](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/commit/09838e85d5c0894d289ef2b69c61dd380dc2420a))
+* **lint:** use type hint more precisely ([c7095a7](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/commit/c7095a75f4854cbab6fc78635b1ed3c53019981b))
+* the scheduler will not be able to pause or resume if extra keys are set in the `config` and fix [#3](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/issues/3) ([fb0da4b](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/commit/fb0da4ba3249ed1c56a24f70a7c178b1f01d91f1))
+
 ## [0.1.1](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/compare/v0.1.0...v0.1.1) (2023-10-24)
 
 ### Bug Fixes
