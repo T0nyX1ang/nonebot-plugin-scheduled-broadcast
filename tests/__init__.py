@@ -9,7 +9,6 @@ from typing import Iterable, Type, Union
 from nonebot.adapters import Event as BaseEvent
 from nonebot.adapters import Message as BaseMessage
 from nonebot.adapters import MessageSegment as BaseMessageSegment
-from nonebot.typing import overrides
 from typing_extensions import override
 
 
@@ -55,32 +54,33 @@ class TestMsgEvent(BaseEvent):
     user_id: str
     message: Union[str, TestMsg, TestMsgSeg]
     post_type: str = "message"
+    location: str = ""
 
-    @overrides(BaseEvent)
+    @override
     def get_type(self) -> str:
         return self.post_type
 
-    @overrides(BaseEvent)
+    @override
     def get_event_name(self) -> str:
         return self.post_type
 
-    @overrides(BaseEvent)
+    @override
     def get_event_description(self) -> str:
         return str(self.dict())
 
-    @overrides(BaseEvent)
+    @override
     def get_message(self) -> TestMsg:
         return TestMsg(self.message)
 
-    @overrides(BaseEvent)
+    @override
     def get_user_id(self) -> str:
         return self.user_id
 
-    @overrides(BaseEvent)
+    @override
     def get_session_id(self) -> str:
-        return self.user_id
+        return f"{self.location}{self.user_id}"
 
-    @overrides(BaseEvent)
+    @override
     def is_tome(self) -> bool:
         """Return whether the event is to the bot."""
         return True
