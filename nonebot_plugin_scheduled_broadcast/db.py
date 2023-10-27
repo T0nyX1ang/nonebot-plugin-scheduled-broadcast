@@ -1,8 +1,8 @@
 """Database storage for scheduled broadcast plugin."""
 
-from typing import Dict, Union, Iterator
+from typing import Dict, Iterator, List, Union
 
-from pydantic import BaseModel, Extra  # pylint: disable=no-name-in-module
+from pydantic import BaseModel, Extra, Field  # pylint: disable=no-name-in-module
 
 
 class BroadcastConfig(BaseModel, extra=Extra.allow):
@@ -12,6 +12,7 @@ class BroadcastConfig(BaseModel, extra=Extra.allow):
     enable: bool
     data: str
     hash: str
+    valid_commands: List[str] = Field(default=[], exclude=True)
 
 
 class BroadcastBotDB(BaseModel, extra=Extra.allow):
