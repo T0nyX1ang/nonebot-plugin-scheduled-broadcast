@@ -2,9 +2,10 @@
 
 from nonebot import on_command
 from nonebot.adapters import Bot, Event, Message
-from nonebot.params import CommandArg
+from nonebot.params import CommandArg, Depends
 from nonebot.permission import SUPERUSER
 from nonebot.plugin import PluginMetadata
+from nonebot.log import logger
 
 from .config import Config
 from .core import (
@@ -28,11 +29,26 @@ anchor_enable = on_command(cmd="启动广播", aliases={"enablebc"}, permission=
 anchor_disable = on_command(cmd="关闭广播", aliases={"disablebc"}, permission=SUPERUSER)
 
 
+def extract_broadcast_id(event: Event, arg: Message = CommandArg()) -> str:
+    """Extract the broadcast id from an event."""
+    arg_text = arg.extract_plain_text().strip()
+    if arg_text:
+        return arg_text  # use the input as broadcast id when it is not empty
+
+    user_id = str(event.get_user_id())
+    session_id = str(event.get_session_id())
+    broadcast_id = session_id.replace(user_id, "")
+
+    if not broadcast_id:
+        logger.warning("The broadcast id seems to be empty, please check the input.")
+
+    return broadcast_id
+
+
 @anchor_enable.handle()
-async def handle_anchor_enable(bot: Bot, event: Event, arg: Message = CommandArg()):
+async def handle_anchor_enable(bot: Bot, event: Event, broadcast_id: str = Depends(extract_broadcast_id)):
     """Handle the anchor_enable command."""
     self_id = str(bot.self_id)
-    broadcast_id = arg.extract_plain_text().strip()
     if not broadcast_id:
         await anchor_enable.finish("广播ID不能为空")
 
@@ -56,10 +72,9 @@ async def handle_anchor_enable(bot: Bot, event: Event, arg: Message = CommandArg
 
 
 @anchor_disable.handle()
-async def handle_anchor_disable(bot: Bot, arg: Message = CommandArg()):
+async def handle_anchor_disable(bot: Bot, broadcast_id: str = Depends(extract_broadcast_id)):
     """Handle the anchor_disable command."""
     self_id = str(bot.self_id)
-    broadcast_id = arg.extract_plain_text().strip()
 
     broadcast_db = load_broadcast_db()
     if self_id not in broadcast_db:
