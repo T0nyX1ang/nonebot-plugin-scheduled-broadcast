@@ -15,6 +15,7 @@ from .core import (
     resume_target_jobs,
     save_broadcast_db,
 )
+from .db import BroadcastConfig, BroadcastBotDB
 
 __plugin_meta__ = PluginMetadata(
     name="定时广播插件",
@@ -53,18 +54,16 @@ async def handle_anchor_enable(bot: Bot, event: Event, broadcast_id: str = Depen
         await anchor_enable.finish("广播ID不能为空")
 
     event_data, event_hash = dump_event(event)
+    broadcast_config = BroadcastConfig(config={}, enable=True, data=event_data, hash=event_hash)
 
     broadcast_db = load_broadcast_db()
     if self_id not in broadcast_db:
-        broadcast_db[self_id] = {}
+        broadcast_db[self_id] = BroadcastBotDB(__root__={})
 
     if broadcast_id not in broadcast_db[self_id]:
-        broadcast_db[self_id][broadcast_id] = {}
-        broadcast_db[self_id][broadcast_id]["config"] = {}
-        broadcast_db[self_id][broadcast_id]["data"] = event_data
-        broadcast_db[self_id][broadcast_id]["hash"] = event_hash
+        broadcast_db[self_id][broadcast_id] = broadcast_config
 
-    broadcast_db[self_id][broadcast_id]["enable"] = True  # enable the broadcast
+    broadcast_db[self_id][broadcast_id].enable = True  # enable the broadcast
     save_broadcast_db(broadcast_db)
     resume_target_jobs(self_id, broadcast_id)
 
@@ -83,7 +82,7 @@ async def handle_anchor_disable(bot: Bot, broadcast_id: str = Depends(extract_br
     if broadcast_id not in broadcast_db[self_id]:
         await anchor_disable.finish("该广播ID不存在, 请检查输入是否正确")
 
-    broadcast_db[self_id][broadcast_id]["enable"] = False  # disable the broadcast
+    broadcast_db[self_id][broadcast_id].enable = False  # disable the broadcast
     save_broadcast_db(broadcast_db)
     pause_target_jobs(self_id, broadcast_id)
 
