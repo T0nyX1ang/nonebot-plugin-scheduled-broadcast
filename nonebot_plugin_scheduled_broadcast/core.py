@@ -6,13 +6,16 @@ import pickle
 from typing import List, Tuple
 
 import nonebot
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 from nonebot.adapters import Event
 from nonebot.log import logger
 
 from .config import Config
 from .db import BroadcastDB
 
-scheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
+scheduler: AsyncIOScheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
+
 global_config = nonebot.get_driver().config
 config = Config.parse_obj(global_config)
 
@@ -91,11 +94,10 @@ def broadcast(cmd_name: str):
             scheduler.add_job(
                 func=func,
                 args=(self_id, event),
-                trigger="cron",
+                trigger=CronTrigger(**broadcast_db[self_id][broadcast_id].config[_name]),
                 id=f"broadcast_{broadcast_id}_bot_{self_id}_command_{_name}",
                 misfire_grace_time=30,
                 replace_existing=True,
-                **broadcast_db[self_id][broadcast_id].config[_name],
             )
             broadcast_db[self_id][broadcast_id].valid_commands.append(_name)
             logger.debug(f"Created broadcast [{broadcast_id}] with bot [{self_id}] for command [{_name}].")
