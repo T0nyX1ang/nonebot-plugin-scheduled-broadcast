@@ -37,7 +37,9 @@ def load_broadcast_db() -> BroadcastDB:
 
 def save_broadcast_db(content: BroadcastDB) -> None:
     """Save the broadcast policy database."""
-    config.broadcast_policy_location.write_text(content.json(indent=4, ensure_ascii=False, sort_keys=True), encoding="utf-8")
+    config.broadcast_policy_location.write_text(
+        content.json(exclude_defaults=True, indent=4, ensure_ascii=False, sort_keys=True), encoding="utf-8"
+    )
 
 
 def load_event(event_str: str, event_hash: str) -> Event:
@@ -94,7 +96,7 @@ def broadcast(cmd_name: str):
             scheduler.add_job(
                 func=func,
                 args=(self_id, event),
-                trigger=CronTrigger(**broadcast_db[self_id][broadcast_id].config[_name]),
+                trigger=CronTrigger(**broadcast_db[self_id][broadcast_id].config[_name].dict()),
                 id=f"broadcast_{broadcast_id}_bot_{self_id}_command_{_name}",
                 misfire_grace_time=30,
                 replace_existing=True,

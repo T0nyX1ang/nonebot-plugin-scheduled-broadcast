@@ -147,13 +147,16 @@ async def test_broadcast_function(app: App):
         broadcast,
         load_broadcast_db,
     )
+    from nonebot_plugin_scheduled_broadcast.db import SchedulerConfig  # pylint: disable=import-outside-toplevel
 
     enable_with_bid = make_event("enablebc testid", user_id="TestSuperUser")
     disable_with_bid = make_event("disablebc testid", user_id="TestSuperUser")
 
     db = load_broadcast_db()
     db["TestBot"]["testid"].enable = False
-    db["TestBot"]["testid"].config = {"testcommand": {"minute": 0}, "unknowncommand": {}}  # special case
+    db["TestBot"]["testid"].config = {}
+    db["TestBot"]["testid"].config["testcommand"] = SchedulerConfig(minute=0)
+    db["TestBot"]["testid"].config["unknowncommand"] = SchedulerConfig()
 
     @broadcast("testcommand")
     async def _(self_id: str, event: TestMsgEvent):
