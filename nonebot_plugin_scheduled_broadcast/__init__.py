@@ -27,9 +27,9 @@ __plugin_meta__ = PluginMetadata(
     usage="""超级用户指令:
                 启动广播/enablebc [-bid 广播ID],
                 关闭广播/disablebc [-bid 广播ID],
-                设置广播/setbc 广播命令 [-bid 广播ID] [-s 秒] [-m 分] [-h 时] [-w 周数] [-d 星期几] [-D 日] [-M 月] [-Y 年]
+                设置广播/setbc 待触发指令 [-bid 广播ID] [-s 秒] [-m 分] [-h 时] [-w 周数] [-d 星期几] [-D 日] [-M 月] [-Y 年]
              装饰器:
-                @broadcast("广播命令")""",
+                @broadcast("待触发指令")""",
     type="library",
     homepage="https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast",
     config=Config,

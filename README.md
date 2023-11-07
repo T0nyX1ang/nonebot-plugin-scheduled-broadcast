@@ -57,16 +57,75 @@
 * 在需要启动广播的地方发送:
 
 ```txt
-    启动广播/enablebc [广播ID]
+    启动广播/enablebc [-bid 广播ID]
 ```
 
 * `广播ID` 是可选项, 如果用户没有输入 `广播ID`, 则会使用对应事件的 `session_id` 去掉 `user_id` 的结果作为 `广播ID`, 如果此时 `广播ID` 为空, 则不支持自动生成 `广播ID`.
 * 如果是第一次使用, 机器人在执行上述命令后, 在 `nonebot2` 项目的根目录下生成一个名为 `broadcast_policy.json` 的配置文件.
-* 如果该机器人下已经存在相同的 `广播ID`, 配置文件将会保留, 同时广播作业将被 `恢复`, 如果不需要修改 `config` 中的内容, 不需要重启.
+* 如果该机器人下已经存在相同的 `广播ID`, 配置文件将会保留, 同时广播作业将被 `恢复`, 如果不需要手动修改配置文件, 不需要重启.
 
-### 配置文件的填写
+### 待触发指令的编写
 
-* 一般而言, 配置文件的结构如下:
+* 由于本插件提供了一个装饰器, 可以按照如下方式编写待触发指令:
+
+```python
+from nonebot import require
+from nonebot.adapters import Event
+from nonebot.log import logger
+
+require("nonebot_plugin_scheduled_broadcast")
+
+from nonebot_plugin_scheduled_broadcast.core import broadcast
+
+@broadcast('example')
+async def _(self_id: str, event: Event):
+    """Scheduled example broadcast."""
+    message = generate_your_message()
+    try:
+        bot = nonebot.get_bots()[self_id]  # select the target bot
+        await bot.send(event=event, message=message)  # send message
+    except Exception:
+        logger.error(traceback.format_exc())  # print logs
+```
+
+* 触发指令编写完成以后, 启动机器人即可.
+
+### 配置待触发指令的广播时间
+
+* 保证发送消息的 `id` 位于 `SUPERUSER` 用户组中.
+* 在需要启动广播的地方发送:
+
+```txt
+    设置广播/setbc 待触发指令 [-bid 广播ID] [-s 秒] [-m 分] [-h 时] [-w 周数] [-d 星期几] [-D 日] [-M 月] [-Y 年]
+```
+
+* `广播ID` 是可选项, 如果用户没有输入 `广播ID`, 则会使用对应事件的 `session_id` 去掉 `user_id` 的结果作为 `广播ID`, 如果此时 `广播ID` 为空, 则不支持自动生成 `广播ID`.
+* 配置项支持**不含空格的** `apscheduler` 语法, 当配置项留空时, 将会使得该指令不被触发.
+
+### 关闭广播
+
+* 保证发送消息的 `id` 位于 `SUPERUSER` 用户组中.
+* 在需要关闭广播的地方发送:
+
+```txt
+    关闭广播/disablebc [-bid 广播ID]
+```
+
+* `广播ID` 是可选项, 如果用户没有输入 `广播ID`, 则会使用对应事件的 `session_id` 去掉 `user_id` 的结果作为 `广播ID`, 如果此时 `广播ID` 为空, 则不支持自动生成 `广播ID`.
+* 停止广播之后, 对应 `广播ID` 中的 `enable` 将被置为 `false`, 为保持可复用性, 其余部分将不会改变, 同时广播作业将被 `暂停`, 如果不需要修改 `config` 中的内容, 不需要重启.
+
+## 配置
+
+* `broadcast_policy_location`: 代表配置文件的存放位置, 默认值为 `./broadcast_policy.json`
+
+## 注意事项
+
+* 由于每一个 `Event` 几乎不会相同, 建议不要在同一个地方多次执行 `启动广播` 命令, 可能会刷屏的.
+* 由于用到了 `pickle` 的序列化和反序列化功能, 而该功能具有潜在的安全风险, **请谨慎对待来源不明的配置文件**. 如果不确定配置文件的安全性, 建议重新启动广播以生成新的 `广播ID`, 然后替换配置文件中的 `config` 键里面的内容.
+
+### 配置文件的手动填写
+
+* 一般而言, 配置文件不需要手动修改, 但是本指南仍然会介绍配置文件的结构:
 
 ```json
 {
@@ -102,56 +161,6 @@
     }
 }
 ```
-
-* 在准备好了配置文件后, 就可以准备编写待触发的指令了.
-
-### 待触发指令的编写
-
-* 由于本插件提供了一个装饰器, 可以按照如下方式编写待触发指令:
-
-```python
-from nonebot import require
-from nonebot.adapters import Event
-from nonebot.log import logger
-
-require("nonebot_plugin_scheduled_broadcast")
-
-from nonebot_plugin_scheduled_broadcast.core import broadcast
-
-@broadcast('example')
-async def _(self_id: str, event: Event):
-    """Scheduled example broadcast."""
-    message = generate_your_message()
-    try:
-        bot = nonebot.get_bots()[self_id]  # select the target bot
-        await bot.send(event=event, message=message)  # send message
-    except Exception:
-        logger.error(traceback.format_exc())  # print logs
-```
-
-* 触发指令编写完成以后, 重新启动机器人即可.
-
-### 关闭广播
-
-* 保证发送消息的 `id` 位于 `SUPERUSER` 用户组中.
-* 在需要关闭广播的地方发送:
-
-```txt
-    关闭广播/disablebc [广播ID]
-```
-
-* `广播ID` 是可选项, 如果用户没有输入 `广播ID`, 则会使用对应事件的 `session_id` 去掉 `user_id` 的结果作为 `广播ID`, 如果此时 `广播ID` 为空, 则不支持自动生成 `广播ID`.
-* 停止广播之后, 对应 `广播ID` 中的 `enable` 将被置为 `false`, 为保持可复用性, 其余部分将不会改变, 同时广播作业将被 `暂停`, 如果不需要修改 `config` 中的内容, 不需要重启.
-
-## 配置
-
-* `broadcast_policy_location`: 代表配置文件的存放位置, 默认值为 `./broadcast_policy.json`
-
-## 注意事项
-
-* 由于每一个 `Event` 几乎不会相同, 建议不要在同一个地方多次执行 `启动广播` 命令, 可能会刷屏的.
-* 由于用到了 `pickle` 的序列化和反序列化功能, 而该功能具有潜在的安全风险, **请谨慎对待来源不明的配置文件**. 如果不确定配置文件的安全性, 建议重新启动广播以生成新的 `广播ID`, 然后替换配置文件中的 `config` 键里面的内容.
-* 由于配置文件的生成限制, 当修改了 `config` 中的内容时, 必须需要重启机器人使得新的配置生效, 其它情况下均不需要重启机器人.
 
 ## 协议
 
