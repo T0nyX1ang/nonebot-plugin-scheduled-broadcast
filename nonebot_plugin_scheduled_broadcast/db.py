@@ -5,10 +5,23 @@ from typing import Dict, Iterator, List, Union
 from pydantic import BaseModel, Extra, Field  # pylint: disable=no-name-in-module
 
 
+class SchedulerConfig(BaseModel, extra=Extra.allow):
+    """The model for a specific apscheduler config."""
+
+    second: Union[int, str, None] = None
+    minute: Union[int, str, None] = None
+    hour: Union[int, str, None] = None
+    week: Union[int, str, None] = None
+    day_of_week: Union[int, str, None] = None
+    day: Union[int, str, None] = None
+    month: Union[int, str, None] = None
+    year: Union[int, str, None] = None
+
+
 class BroadcastConfig(BaseModel, extra=Extra.allow):
     """The model for a specific broadcast config."""
 
-    config: Dict[str, Dict[str, Union[int, str]]]  # apscheduler compatible config
+    config: Dict[str, SchedulerConfig]
     enable: bool
     data: str
     hash: str

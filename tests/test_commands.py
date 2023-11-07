@@ -43,9 +43,10 @@ async def test_broadcast_command(app: App):
         load_event,
     )
 
-    normal_user_enable_bid = make_event("enablebc testid")
+    normal_user_enable_bid = make_event("enablebc --broadcast-id testid")
     enable_without_bid = make_event("enablebc", user_id="TestSuperUser")
-    enable_with_bid = make_event("enablebc testid", user_id="TestSuperUser")
+    enable_missing_param = make_event("enablebc -bid", user_id="TestSuperUser")
+    enable_with_bid = make_event("enablebc --broadcast-id testid", user_id="TestSuperUser")
     enable_with_location = make_event("enablebc", user_id="TestSuperUser", location="TestLocation")
 
     async with app.test_matcher(anchor_enable) as ctx:
@@ -57,13 +58,17 @@ async def test_broadcast_command(app: App):
         ctx.should_pass_permission()
         ctx.should_call_send(enable_without_bid, "广播ID不能为空")
 
+        ctx.receive_event(bot, enable_missing_param)
+        ctx.should_pass_permission()
+        # ctx.should_call_send(enable_missing_param, "")
+
         ctx.receive_event(bot, enable_with_bid)
         ctx.should_pass_permission()
-        ctx.should_call_send(enable_with_bid, "已启动广播, 广播ID为testid, 请进行广播配置, 需要删除广播时请使用关闭广播+广播ID")
+        ctx.should_call_send(enable_with_bid, "已启动ID为testid的广播")
 
         ctx.receive_event(bot, enable_with_location)
         ctx.should_pass_permission()
-        ctx.should_call_send(enable_with_location, "已启动广播, 广播ID为TestLocation, 请进行广播配置, 需要删除广播时请使用关闭广播+广播ID")
+        ctx.should_call_send(enable_with_location, "已启动ID为TestLocation的广播")
 
         assert pathlib.Path("broadcast_policy.json").exists()
 
@@ -74,7 +79,7 @@ async def test_broadcast_command(app: App):
     assert db["TestBot"]["TestLocation"].config == {}
 
     recovered_event = load_event(db["TestBot"]["testid"].data, db["TestBot"]["testid"].hash)
-    assert recovered_event.get_message() == TestMsg("enablebc testid")
+    assert recovered_event.get_message() == TestMsg("enablebc --broadcast-id testid")
     assert recovered_event.get_user_id() == "TestSuperUser"
     assert recovered_event.get_session_id() == "TestSuperUser"
 
@@ -92,10 +97,10 @@ async def test_disable_broadcast_command(app: App):
         load_broadcast_db,
     )
 
-    normal_user_disable_bid = make_event("disablebc testid")
+    normal_user_disable_bid = make_event("disablebc -bid testid")
     disable_without_bid = make_event("disablebc", user_id="TestSuperUser")
-    disable_with_fake_bid = make_event("disablebc fakeid", user_id="TestSuperUser")
-    disable_with_bid = make_event("disablebc testid", user_id="TestSuperUser")
+    disable_with_fake_bid = make_event("disablebc -bid fakeid", user_id="TestSuperUser")
+    disable_with_bid = make_event("disablebc -bid testid", user_id="TestSuperUser")
     disable_with_location = make_event("disablebc", user_id="TestSuperUser", location="TestLocation")
 
     async with app.test_matcher(anchor_disable) as ctx:
@@ -113,11 +118,11 @@ async def test_disable_broadcast_command(app: App):
 
         ctx.receive_event(bot, disable_with_bid)
         ctx.should_pass_permission()
-        ctx.should_call_send(disable_with_bid, "已关闭广播")
+        ctx.should_call_send(disable_with_bid, "已关闭ID为testid的广播")
 
         ctx.receive_event(bot, disable_with_location)
         ctx.should_pass_permission()
-        ctx.should_call_send(disable_with_location, "已关闭广播")
+        ctx.should_call_send(disable_with_location, "已关闭ID为TestLocation的广播")
 
     db = load_broadcast_db()
     assert db["TestBot"]["testid"].enable is False
@@ -142,18 +147,50 @@ async def test_broadcast_function(app: App):
     from nonebot_plugin_scheduled_broadcast import (  # pylint: disable=import-outside-toplevel
         anchor_disable,
         anchor_enable,
+        anchor_setting,
     )
     from nonebot_plugin_scheduled_broadcast.core import (  # pylint: disable=import-outside-toplevel
         broadcast,
         load_broadcast_db,
     )
 
-    enable_with_bid = make_event("enablebc testid", user_id="TestSuperUser")
-    disable_with_bid = make_event("disablebc testid", user_id="TestSuperUser")
+    enable_with_bid = make_event("enablebc --broadcast-id testid", user_id="TestSuperUser")
+    disable_with_bid = make_event("disablebc --broadcast-id testid", user_id="TestSuperUser")
+    setting_with_bid_valid_cmd = make_event("setbc testcommand -bid testid -m 0", user_id="TestSuperUser")
+    resetting_with_bid_valid_cmd = make_event("setbc testcommand -bid testid -m */10", user_id="TestSuperUser")
+    setting_with_bid_valid_cmd_2 = make_event(
+        "setbc unknowncommand -bid testid -s 45 -h 2 -M 11 -Y 2099", user_id="TestSuperUser"
+    )
+    setting_with_bid_invalid_cmd = make_event("setbc testcommand", user_id="TestSuperUser")
+    setting_with_bid_invalid_cmd_2 = make_event(
+        "setbc fakecommand -bid unknownid -s 90 -h 2 -M 11 -Y 2099", user_id="TestSuperUser"
+    )
+
+    async with app.test_matcher(anchor_setting) as ctx:
+        bot = ctx.create_bot(self_id="TestBot")
+        ctx.receive_event(bot, setting_with_bid_valid_cmd)
+        ctx.should_pass_permission()
+        ctx.should_call_send(setting_with_bid_valid_cmd, "已设置广播ID为testid, 指令为testcommand的广播")
+
+        ctx.receive_event(bot, setting_with_bid_valid_cmd_2)
+        ctx.should_pass_permission()
+        ctx.should_call_send(setting_with_bid_valid_cmd_2, "已设置广播ID为testid, 指令为unknowncommand的广播")
+
+        ctx.receive_event(bot, setting_with_bid_invalid_cmd)
+        ctx.should_pass_permission()
+        ctx.should_call_send(setting_with_bid_invalid_cmd, "广播ID不能为空")
+
+        ctx.receive_event(bot, setting_with_bid_invalid_cmd_2)
+        ctx.should_pass_permission()
+        ctx.should_call_send(setting_with_bid_invalid_cmd_2, "广播ID不存在或者参数配置错误, 请检查输入是否正确")
 
     db = load_broadcast_db()
     db["TestBot"]["testid"].enable = False
-    db["TestBot"]["testid"].config = {"testcommand": {"minute": 0}, "unknowncommand": {}}  # special case
+    assert db["TestBot"]["testid"].config["testcommand"].minute == 0
+    assert db["TestBot"]["testid"].config["unknowncommand"].second == 45
+    assert db["TestBot"]["testid"].config["unknowncommand"].hour == 2
+    assert db["TestBot"]["testid"].config["unknowncommand"].month == 11
+    assert db["TestBot"]["testid"].config["unknowncommand"].year == 2099
 
     @broadcast("testcommand")
     async def _(self_id: str, event: TestMsgEvent):
@@ -180,7 +217,7 @@ async def test_broadcast_function(app: App):
         bot = ctx.create_bot(self_id="TestBot")
         ctx.receive_event(bot, enable_with_bid)
         ctx.should_pass_permission()
-        ctx.should_call_send(enable_with_bid, "已启动广播, 广播ID为testid, 请进行广播配置, 需要删除广播时请使用关闭广播+广播ID")
+        ctx.should_call_send(enable_with_bid, "已启动ID为testid的广播")
 
     assert db["TestBot"]["testid"].enable is True
     assert "broadcast_testid_bot_TestBot_command_testcommand" in job_ids
@@ -194,9 +231,19 @@ async def test_broadcast_function(app: App):
         bot = ctx.create_bot(self_id="TestBot")
         ctx.receive_event(bot, disable_with_bid)
         ctx.should_pass_permission()
-        ctx.should_call_send(disable_with_bid, "已关闭广播")
+        ctx.should_call_send(disable_with_bid, "已关闭ID为testid的广播")
 
     assert db["TestBot"]["testid"].enable is False
+
+    async with app.test_matcher(anchor_setting) as ctx:
+        bot = ctx.create_bot(self_id="TestBot")
+        ctx.receive_event(bot, resetting_with_bid_valid_cmd)
+        ctx.should_pass_permission()
+        ctx.should_call_send(resetting_with_bid_valid_cmd, "已设置广播ID为testid, 指令为testcommand的广播")
+
+    assert db["TestBot"]["testid"].config["testcommand"].second is None
+    assert db["TestBot"]["testid"].config["testcommand"].minute == "*/10"
+    assert db["TestBot"]["testid"].config["testcommand"].hour is None
 
     # false hash
     db["TestBot"]["testid"].hash = db["TestBot"]["testid"].hash[::-1]
