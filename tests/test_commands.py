@@ -147,21 +147,50 @@ async def test_broadcast_function(app: App):
     from nonebot_plugin_scheduled_broadcast import (  # pylint: disable=import-outside-toplevel
         anchor_disable,
         anchor_enable,
+        anchor_setting,
     )
     from nonebot_plugin_scheduled_broadcast.core import (  # pylint: disable=import-outside-toplevel
         broadcast,
         load_broadcast_db,
     )
-    from nonebot_plugin_scheduled_broadcast.db import SchedulerConfig  # pylint: disable=import-outside-toplevel
 
     enable_with_bid = make_event("enablebc --broadcast-id testid", user_id="TestSuperUser")
     disable_with_bid = make_event("disablebc --broadcast-id testid", user_id="TestSuperUser")
+    setting_with_bid_valid_cmd = make_event("setbc testcommand -bid testid -m 0", user_id="TestSuperUser")
+    resetting_with_bid_valid_cmd = make_event("setbc testcommand -bid testid -m */10", user_id="TestSuperUser")
+    setting_with_bid_valid_cmd_2 = make_event(
+        "setbc unknowncommand -bid testid -s 45 -h 2 -M 11 -Y 2099", user_id="TestSuperUser"
+    )
+    setting_with_bid_invalid_cmd = make_event("setbc testcommand", user_id="TestSuperUser")
+    setting_with_bid_invalid_cmd_2 = make_event(
+        "setbc fakecommand -bid unknownid -s 90 -h 2 -M 11 -Y 2099", user_id="TestSuperUser"
+    )
+
+    async with app.test_matcher(anchor_setting) as ctx:
+        bot = ctx.create_bot(self_id="TestBot")
+        ctx.receive_event(bot, setting_with_bid_valid_cmd)
+        ctx.should_pass_permission()
+        ctx.should_call_send(setting_with_bid_valid_cmd, "已设置广播ID为testid, 指令为testcommand的广播")
+
+        ctx.receive_event(bot, setting_with_bid_valid_cmd_2)
+        ctx.should_pass_permission()
+        ctx.should_call_send(setting_with_bid_valid_cmd_2, "已设置广播ID为testid, 指令为unknowncommand的广播")
+
+        ctx.receive_event(bot, setting_with_bid_invalid_cmd)
+        ctx.should_pass_permission()
+        ctx.should_call_send(setting_with_bid_invalid_cmd, "广播ID不能为空")
+
+        ctx.receive_event(bot, setting_with_bid_invalid_cmd_2)
+        ctx.should_pass_permission()
+        ctx.should_call_send(setting_with_bid_invalid_cmd_2, "广播ID不存在或者参数配置错误, 请检查输入是否正确")
 
     db = load_broadcast_db()
     db["TestBot"]["testid"].enable = False
-    db["TestBot"]["testid"].config = {}
-    db["TestBot"]["testid"].config["testcommand"] = SchedulerConfig(minute=0)
-    db["TestBot"]["testid"].config["unknowncommand"] = SchedulerConfig()
+    assert db["TestBot"]["testid"].config["testcommand"].minute == 0
+    assert db["TestBot"]["testid"].config["unknowncommand"].second == 45
+    assert db["TestBot"]["testid"].config["unknowncommand"].hour == 2
+    assert db["TestBot"]["testid"].config["unknowncommand"].month == 11
+    assert db["TestBot"]["testid"].config["unknowncommand"].year == 2099
 
     @broadcast("testcommand")
     async def _(self_id: str, event: TestMsgEvent):
@@ -205,6 +234,16 @@ async def test_broadcast_function(app: App):
         ctx.should_call_send(disable_with_bid, "已关闭ID为testid的广播")
 
     assert db["TestBot"]["testid"].enable is False
+
+    async with app.test_matcher(anchor_setting) as ctx:
+        bot = ctx.create_bot(self_id="TestBot")
+        ctx.receive_event(bot, resetting_with_bid_valid_cmd)
+        ctx.should_pass_permission()
+        ctx.should_call_send(resetting_with_bid_valid_cmd, "已设置广播ID为testid, 指令为testcommand的广播")
+
+    assert db["TestBot"]["testid"].config["testcommand"].second is None
+    assert db["TestBot"]["testid"].config["testcommand"].minute == "*/10"
+    assert db["TestBot"]["testid"].config["testcommand"].hour is None
 
     # false hash
     db["TestBot"]["testid"].hash = db["TestBot"]["testid"].hash[::-1]
