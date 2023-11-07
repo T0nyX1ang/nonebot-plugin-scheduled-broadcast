@@ -1,8 +1,11 @@
 """The initialization file."""
 
-from nonebot import on_command
-from nonebot.adapters import Bot, Event, Message
-from nonebot.params import CommandArg, Depends
+from argparse import Namespace
+
+from nonebot import on_shell_command
+from nonebot.adapters import Bot, Event
+from nonebot.rule import ArgumentParser
+from nonebot.params import ShellCommandArgs, Depends
 from nonebot.permission import SUPERUSER
 from nonebot.plugin import PluginMetadata
 from nonebot.log import logger
@@ -20,19 +23,27 @@ from .db import BroadcastConfig, BroadcastBotDB
 __plugin_meta__ = PluginMetadata(
     name="定时广播插件",
     description="一款可配置的, 不依赖具体适配器的, 基于事件的定时广播插件.",
-    usage="超级用户指令:\n启动广播/enablebc 广播ID,\n关闭广播/disablebc 广播ID\n装饰器: broadcast",
+    usage="""超级用户指令:
+                启动广播/enablebc [-bid 广播ID],
+                关闭广播/disablebc [-bid 广播ID],
+             装饰器:
+                @broadcast(cmd_name)""",
     type="library",
     homepage="https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast",
     config=Config,
 )
 
-anchor_enable = on_command(cmd="启动广播", aliases={"enablebc"}, permission=SUPERUSER)
-anchor_disable = on_command(cmd="关闭广播", aliases={"disablebc"}, permission=SUPERUSER)
+bid_receiver = ArgumentParser(add_help=False)
+bid_receiver.add_argument("-bid", "--broadcast-id", default="")
+
+anchor_enable = on_shell_command(cmd="启动广播", aliases={"enablebc"}, parser=bid_receiver, permission=SUPERUSER)
+anchor_disable = on_shell_command(cmd="关闭广播", aliases={"disablebc"}, parser=bid_receiver, permission=SUPERUSER)
 
 
-def extract_broadcast_id(event: Event, arg: Message = CommandArg()) -> str:
+def extract_broadcast_id(event: Event, arg: Namespace = ShellCommandArgs()) -> str:
     """Extract the broadcast id from an event."""
-    arg_text = arg.extract_plain_text().strip()
+
+    arg_text = str(arg.broadcast_id)
     if arg_text:
         return arg_text  # use the input as broadcast id when it is not empty
 
