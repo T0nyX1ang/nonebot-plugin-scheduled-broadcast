@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.3](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/compare/v0.1.2...v0.1.3) (2023-11-08)
+
+### Features
+
+* **cmd:** change command format by `argparse` ([7d2aa79](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/commit/7d2aa7999ab17e7030b4d640d5cd047483542daa))
+* support online command setting (fix [#7](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/issues/7)) ([011f3e5](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/commit/011f3e5a96342713ea4c202a11d70a383ff3b029))
+
+### Bug Fixes
+
+* **scheduler:** `next_time` in scheduler is not updated ([88b1d6d](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/commit/88b1d6de0a0dab4d6d56feb42968bf5e3b1852e7))
+
 ## [0.1.2](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/compare/v0.1.1...v0.1.2) (2023-10-27)
 
 ### Features
