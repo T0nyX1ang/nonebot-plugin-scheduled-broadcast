@@ -71,7 +71,7 @@ def valid(cmd_name: str) -> List[Tuple[str, str]]:
 def modify_target_job(self_id: str, broadcast_id: str, cmd_name: str) -> None:
     """Modify a target job to the scheduler from a bot with a broadcast id."""
     if cmd_name in broadcast_db[self_id][broadcast_id].valid_commands:
-        scheduler.modify_job(
+        scheduler.reschedule_job(
             job_id=f"broadcast_{broadcast_id}_bot_{self_id}_command_{cmd_name}",
             trigger=CronTrigger(**broadcast_db[self_id][broadcast_id].config[cmd_name].dict()),
         )
