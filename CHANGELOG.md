@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.5](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/compare/v0.1.4...v0.1.5) (2023-11-10)
+
+### Bug Fixes
+
+* **ci:** full git tags are not checked out ([e708a8e](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/commit/e708a8efe92ff0f402898ae01b9a914c757a9f97))
+
 ## [0.1.4](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/compare/v0.1.3...v0.1.4) (2023-11-10)
 
 ### Features

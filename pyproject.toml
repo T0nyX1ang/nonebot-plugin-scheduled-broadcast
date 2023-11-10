@@ -1,6 +1,6 @@
 [project]
 name = "nonebot-plugin-scheduled-broadcast"
-version = "0.1.4"
+version = "0.1.5"
 description = "A customizable, adapter-independent, event-based scheduled broadcaster aiming for all nonebot2 adapters."
 authors = [
     {name = "Tony Xiang", email = "tonyxfy@qq.com"},
