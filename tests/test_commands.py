@@ -148,11 +148,13 @@ async def test_broadcast_function(app: App):
         anchor_disable,
         anchor_enable,
         anchor_setting,
+        broadcast,
     )
     from nonebot_plugin_scheduled_broadcast.core import (  # pylint: disable=import-outside-toplevel
-        broadcast,
         load_broadcast_db,
     )
+
+    scheduler.start(paused=True)
 
     enable_with_bid = make_event("enablebc --broadcast-id testid", user_id="TestSuperUser")
     disable_with_bid = make_event("disablebc --broadcast-id testid", user_id="TestSuperUser")
@@ -247,6 +249,8 @@ async def test_broadcast_function(app: App):
 
     # false hash
     db["TestBot"]["testid"].hash = db["TestBot"]["testid"].hash[::-1]
+
+    scheduler.shutdown()
 
     try:
 
