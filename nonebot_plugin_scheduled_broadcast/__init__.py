@@ -19,6 +19,7 @@ from .core import (
     resume_session_jobs,
     save_broadcast_db,
 )
+from .core import broadcast as broadcast
 from .db import BroadcastBotDB, BroadcastConfig, SchedulerConfig
 
 __plugin_meta__ = PluginMetadata(

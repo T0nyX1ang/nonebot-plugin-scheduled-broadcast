@@ -5,7 +5,8 @@
         "--disable=unnecessary-lambda",
         "--disable=line-too-long",
         "--disable=unused-argument",
-        "--disable=superfluous-parens"
+        "--disable=superfluous-parens",
+        "--disable=useless-import-alias",
     ],
     "[python]": {
         "editor.formatOnSaveMode": "file",
