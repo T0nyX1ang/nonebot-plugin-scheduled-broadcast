@@ -8,7 +8,8 @@ from typing import List, Tuple
 import nonebot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from nonebot.adapters import Event
+from nonebot.adapters import Bot, Event
+from nonebot.drivers import Driver
 from nonebot.log import logger
 
 from .config import Config
@@ -77,18 +78,40 @@ def modify_target_job(self_id: str, broadcast_id: str, cmd_name: str) -> None:
         )
 
 
-def pause_all_jobs(self_id: str, broadcast_id: str) -> None:
+def pause_session_jobs(self_id: str, broadcast_id: str) -> None:
     """Pause all jobs from a bot with a broadcast id."""
     for cmd_name in broadcast_db[self_id][broadcast_id].valid_commands:
         scheduler.pause_job(f"broadcast_{broadcast_id}_bot_{self_id}_command_{cmd_name}")
         logger.debug(f"Paused broadcast [{broadcast_id}] with bot [{self_id}] for command [{cmd_name}].")
 
 
-def resume_all_jobs(self_id: str, broadcast_id: str) -> None:
+@Driver.on_bot_disconnect
+def pause_bot_jobs(bot: Bot) -> None:
+    """Pause all jobs from a bot."""
+    if not scheduler.running:  # check the scheduler has been shut down first
+        return
+
+    logger.debug(f"Detected bot disconnection. Pausing all jobs from bot [{bot.self_id}].")
+    self_id = str(bot.self_id)
+    for broadcast_id in broadcast_db[self_id]:
+        pause_session_jobs(self_id, broadcast_id)
+
+
+def resume_session_jobs(self_id: str, broadcast_id: str) -> None:
     """Resume all jobs from a bot with a broadcast id."""
     for cmd_name in broadcast_db[self_id][broadcast_id].valid_commands:
         scheduler.resume_job(f"broadcast_{broadcast_id}_bot_{self_id}_command_{cmd_name}")
         logger.debug(f"Resumed broadcast [{broadcast_id}] with bot [{self_id}] for command [{cmd_name}].")
+
+
+@Driver.on_bot_connect
+def resume_bot_jobs(bot: Bot) -> None:
+    """Pause all jobs from a bot."""
+    logger.debug(f"Detected bot connection. Resuming all available jobs from bot [{bot.self_id}].")
+    self_id = str(bot.self_id)
+    for broadcast_id in broadcast_db[self_id]:
+        if broadcast_db[self_id][broadcast_id].enable:
+            resume_session_jobs(self_id, broadcast_id)
 
 
 def broadcast(cmd_name: str):
@@ -99,8 +122,8 @@ def broadcast(cmd_name: str):
         """Rule wrapper for "broadcast" item in the policy control."""
         logger.debug(f"Checking broadcast: [{_name}].")
         for self_id, broadcast_id in valid(_name):
-            event_data: str = broadcast_db[self_id][broadcast_id].data
-            event_hash: str = broadcast_db[self_id][broadcast_id].hash
+            event_data = broadcast_db[self_id][broadcast_id].data
+            event_hash = broadcast_db[self_id][broadcast_id].hash
             event = load_event(event_data, event_hash)
             scheduler.add_job(
                 func=func,
@@ -112,9 +135,6 @@ def broadcast(cmd_name: str):
             )
             broadcast_db[self_id][broadcast_id].valid_commands.append(_name)
             logger.debug(f"Created broadcast [{broadcast_id}] with bot [{self_id}] for command [{_name}].")
-
-            if not broadcast_db[self_id][broadcast_id].enable:
-                scheduler.pause_job(f"broadcast_{broadcast_id}_bot_{self_id}_command_{_name}")
-                logger.debug(f"Paused broadcast [{broadcast_id}] with bot [{self_id}] for command [{_name}].")
+            scheduler.pause_job(f"broadcast_{broadcast_id}_bot_{self_id}_command_{_name}")
 
     return _broadcast

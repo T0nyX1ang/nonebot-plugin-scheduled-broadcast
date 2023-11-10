@@ -14,9 +14,9 @@ from .config import Config
 from .core import (
     dump_event,
     load_broadcast_db,
-    pause_all_jobs,
-    resume_all_jobs,
     modify_target_job,
+    pause_session_jobs,
+    resume_session_jobs,
     save_broadcast_db,
 )
 from .db import BroadcastBotDB, BroadcastConfig, SchedulerConfig
@@ -90,7 +90,7 @@ async def handle_anchor_enable(bot: Bot, event: Event, broadcast_id: str = Depen
 
     broadcast_db[self_id][broadcast_id].enable = True  # enable the broadcast
     save_broadcast_db(broadcast_db)
-    resume_all_jobs(self_id, broadcast_id)
+    resume_session_jobs(self_id, broadcast_id)
 
     await anchor_enable.finish(f"已启动ID为{broadcast_id}的广播")
 
@@ -109,7 +109,7 @@ async def handle_anchor_disable(bot: Bot, broadcast_id: str = Depends(extract_br
 
     broadcast_db[self_id][broadcast_id].enable = False  # disable the broadcast
     save_broadcast_db(broadcast_db)
-    pause_all_jobs(self_id, broadcast_id)
+    pause_session_jobs(self_id, broadcast_id)
 
     await anchor_disable.finish(f"已关闭ID为{broadcast_id}的广播")
 
