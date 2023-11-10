@@ -75,7 +75,7 @@ from nonebot.log import logger
 
 require("nonebot_plugin_scheduled_broadcast")
 
-from nonebot_plugin_scheduled_broadcast.core import broadcast
+from nonebot_plugin_scheduled_broadcast import broadcast
 
 @broadcast('example')
 async def _(self_id: str, event: Event):
@@ -122,6 +122,7 @@ async def _(self_id: str, event: Event):
 
 * 由于每一个 `Event` 几乎不会相同, 建议不要在同一个地方多次执行 `启动广播` 命令, 可能会刷屏的.
 * 由于用到了 `pickle` 的序列化和反序列化功能, 而该功能具有潜在的安全风险, **请谨慎对待来源不明的配置文件**. 如果不确定配置文件的安全性, 建议重新启动广播以生成新的 `广播ID`, 然后替换配置文件中的 `config` 键里面的内容.
+* 目前版本使用了 `nonebot.driver.Driver` 中的 `on_bot_connect` 和 `on_bot_disconnect` 钩子函数用于检测 `Bot` 的连接与断开, 但是适配器 `adapter-console` 中检测断开的时机过晚, 导致终端退出时 `scheduler` 仍然在后台运行, **不建议**在生产环境引入该适配器.
 
 ### 配置文件的手动填写
 
