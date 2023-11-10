@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.4](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/compare/v0.1.3...v0.1.4) (2023-11-10)
+
+### Features
+
+* import broadcast decorator into `__init__` for convenience ([f7bee6e](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/commit/f7bee6e57527fc6005ce40a5b367fb4202743bca))
+* support pausing/resuming jobs during bot disconnection/connection (fix [#10](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/issues/10)) ([019b406](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/commit/019b406d29f030f91c049c77f94e420b1146b128))
+
 ## [0.1.3](https://github.com/T0nyX1ang/nonebot-plugin-scheduled-broadcast/compare/v0.1.2...v0.1.3) (2023-11-08)
 
 ### Features

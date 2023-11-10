@@ -1,0 +1,60 @@
+# This workflow will upload a Python Package using Twine when a release is created
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#publishing-to-package-registries
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Release Python Package
+
+on:
+  push:
+    tags: "v*.*.*"
+
+jobs:
+  release:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup PDM
+      uses: pdm-project/setup-pdm@v3
+      with:
+        python-version: 3.8
+        architecture: "x64"
+        cache: true
+
+    # You are now able to use PDM in your workflow
+    - name: Install dependencies
+      run: pdm sync -G:all
+
+    - name: Publish package
+      run: pdm publish
+
+    # Generate changelog
+    - name: Generate changelog
+      run: |
+        PREV=`git tag --sort=committerdate | grep -v conti | tail -n 2 | head -n1`
+        echo "# Changelog" > x.md
+        echo "" >> x.md
+        echo "All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines." >> x.md
+        echo "" >> x.md
+        git diff -U0 --output-indicator-new=? ${PREV} HEAD CHANGELOG.md | grep "^?" | sed 's/?//g' >> x.md
+
+    # Release wheel and archive
+    - name: Release wheel and archive
+      uses: softprops/action-gh-release@v0.1.15
+      with:
+        files: |
+          ./dist/*.whl
+          ./dist/*.tar.gz
+        body_path: x.md
+        fail_on_unmatched_files: true
+        generate_release_notes: false
+
+
